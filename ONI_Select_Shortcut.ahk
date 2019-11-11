@@ -179,9 +179,9 @@ XButton2::
 		SetCancelButton()
 	} else {
 		MouseGetPos, oldX, oldY
-		Sleep 400
+		Sleep 100
 		MouseClick Left, CancelButton["x"], CancelButton["y"], 1, 0
-		Sleep 200
+		Sleep 100
 		MouseMove, oldX, oldY, 0
 	}
 Return
