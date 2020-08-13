@@ -1,9 +1,33 @@
 ﻿;
 ;   Oxygen Not Included Select Shortcut
 ;
-;   Description:  Use mouse forward back buttons to copy structures.  Moves mouse to cancel build button when back XButton2 is pressed.  Trains the script where this button is.
+;   Description:  Several keys for QOL enhancements in ONI.  
 
-; Version: 1.0
+; Sensible overlays open building menu and overlay
+;    CapsLock + 1    - Open Plumbing
+;    CapsLock & 2    - Open Gases
+;    CapsLock & 3    - Open Electrical
+;    CapsLock & 4    - Open Logic
+;    CapsLock & 4    - Open Shipping
+;
+; Rotate building
+;    Tiltwheel left - Rotate
+;
+; Easy copy and deconstruct
+;    Mouse Backward  - Copy selected tile
+;    Mouse forward   - Deconstruct selected tile
+;    Alt + Mforward  - Train AHK where Deconstruct button is
+;
+; Quickly copy parts to a new location.
+;    Shift Click     - Copy selected tile and zoom focus to slot bookmarked with ONI Ctrl+2 command.  Use vanilla Shift-1 to go back.  
+;    Alt + Click     - Remap Alt + Click to Shift Click.  Alt + Click, release Click then release Alt.
+
+;
+; Pliers Mod
+;    CapsLock + x    - Use Pliers while in overlay
+;    Alt + x         - Train AHK where Pliers button is
+
+; Version: 1.1
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 ;#Warn  ; Enable warnings to assist with detecting common errors.
@@ -22,14 +46,14 @@ if not (FileExist(ConfigFile)) {
 	FileAppend,
 	(
 [main]
-CancelButton=
+DeconstructButton=
 PliersButton=
 ShippingButton=
 	), % ConfigFile, utf-16 ; save your ini file asUTF-16LE
 }
 ; Or read saved values
-IniRead, temp, % ConfigFile, main, CancelButton
-global CancelButton := temp == "" ? "" : {x: StrSplit(temp,",")[1], y: StrSplit(temp,",")[2]}
+IniRead, temp, % ConfigFile, main, DeconstructButton
+global DeconstructButton := temp == "" ? "" : {x: StrSplit(temp,",")[1], y: StrSplit(temp,",")[2]}
 
 IniRead, temp, % ConfigFile, main, PliersButton
 global PliersButton := temp == "" ? "" : {x: StrSplit(temp,",")[1], y: StrSplit(temp,",")[2]}
@@ -126,8 +150,6 @@ SetShippingButton() {
     UserPopupTip("")
 }
 
-
-
 ;;;
 ;;;  Rotate
 ;;;
@@ -136,6 +158,71 @@ WheelRight::
 	Send o
 Return
 
+;;;
+;;; Browser_Back reassignment to Copy Build
+;;;
+XButton1::
+Send {B}
+Return
+
+;;;
+;;; Browser_Forward reassignment to Deconstruct Build
+;;;
+XButton2::
+	if ( DeconstructButton == "" ) {
+		SetDeconstructButton()
+	} else {
+		MouseGetPos, oldX, oldY
+		Sleep 100
+		MouseClick Left, DeconstructButton["x"], DeconstructButton["y"], 1, 0
+		Sleep 100
+		MouseMove, oldX, oldY, 0
+	}
+Return
+
+!XButton2::
+	SetDeconstructButton()
+Return
+
+SetDeconstructButton() {
+    UserPopupTip("Please click in the middle of the Deconstruct Build button.  Hit Alt-XButton2 to try again.")
+    KeyWait, LButton, D
+    MouseGetPos, X, Y
+	DeconstructButton := {x: X, y: Y}
+			IniWrite %  X . "," . Y, % ConfigFile, main, DeconstructButton
+    UserPopupTip("")
+}
+
+;;;
+;;; Quickly copy parts to a new location.
+;    Shift Click     - Copy selected tile and zoom focus to slot bookmarked with ONI Ctrl+2 command.  Use vanilla Shift-1 to go back.  
++LButton::
+;UserPopupTip("+LButton")
+;Sleep 1000
+;UserPopupTip("")
+Send {2}
+   KeyWait, Shift
+ ;  UserPopupTip("release")
+;Sleep 1000
+;UserPopupTip("")
+Send {b}
+;Sleep 1000
+
+Return
+
+; Remap Alt + Click to Shift Click
+!LButton::
+KeyWait, Alt
+;UserPopupTip("shift click it")
+;Sleep 1000
+;UserPopupTip("")
+Send {Shift down}
+Sleep 50
+Send {Click}
+Sleep 50
+Send {Shift up}
+
+Return
 
 ;;;
 ;;; Shortcut for pliers while in overlay screen
@@ -165,39 +252,15 @@ SetPliersButton() {
 
     UserPopupTip("")
 }
-	
-;;;
-;;; Browser_Back reassignment to Copy Build
-;;;
-XButton1::Send B
 
-;;;
-;;; Browser_Forward reassignment to Cancel Build
-;;;
-XButton2::
-	if ( CancelButton == "" ) {
-		SetCancelButton()
-	} else {
-		MouseGetPos, oldX, oldY
-		Sleep 100
-		MouseClick Left, CancelButton["x"], CancelButton["y"], 1, 0
-		Sleep 100
-		MouseMove, oldX, oldY, 0
-	}
-Return
 
-!XButton2::
-	SetCancelButton()
-Return
 
-SetCancelButton() {
-    UserPopupTip("Please click in the middle of the Cancel Build button.  Hit Alt-XButton2 to try again.")
-    KeyWait, LButton, D
-    MouseGetPos, X, Y
-	CancelButton := {x: X, y: Y}
-			IniWrite %  X . "," . Y, % ConfigFile, main, CancelButton
-    UserPopupTip("")
-}
+
+
+
+
+
+
 
 ;;;
 ;;;  Debug Log in the same directory as the script.  Uncomment Log lines to get output.
@@ -224,6 +287,7 @@ UserPopupTipTimeOut:
 ;;;  Custom ESC to exit overlays or other menus
 ;;;
 CustomESC() {
+return
 	;Progress, B2 FS16 ZX10 ZY10 X50 Y100 W500 CTwhite CWgrey, "wqweqweqweqwe", , , Arial Bold
 	;UserPopupTip("clickig")
 	Click, Right
