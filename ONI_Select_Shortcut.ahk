@@ -3,6 +3,15 @@
 ;
 ;   Description:  Several keys for QOL enhancements in ONI.  
 
+; Quick priority
+;Alt + 1 - Priority 9
+;Alt + 2 - Priority 8
+;Alt + 3 - Priority 7
+;Alt + 4 - Priority 6
+;Alt + 5 - Priority 5
+
+
+
 ; Sensible overlays open building menu and overlay
 ;    CapsLock + 1    - Open Plumbing
 ;    CapsLock & 2    - Open Gases
@@ -62,16 +71,41 @@ IniRead, temp, % ConfigFile, main, ShippingButton
 global ShippingButton := temp == "" ? "" : {x: StrSplit(temp,",")[1], y: StrSplit(temp,",")[2]}
 
 
+
+;;;
+;;;
+;;;  Quick Priority
+*!1::
+Sleep 200
+	Send {BLIND}{Alt Up}{p}{9}
+	Return
+*!2::
+Sleep 200
+	Send {BLIND}{Alt Up}{p}{8}
+	Return
+*!3::
+Sleep 200
+	Send {BLIND}{Alt Up}{p}{7}
+	Return
+*!4::
+Sleep 200
+	Send {BLIND}{Alt Up}{p}{6}
+	Return
+*!5::
+Sleep 200
+	Send {BLIND}{Alt Up}{p}{5}
+	Return
+
 ;;;
 ;;;
 ;;;SetCapsLockState, AlwaysOff
-
+	
 ; Open Plumbing
 CapsLock & 1::
 	Send 1
 	Return	
 1::
-	CustomESC()s
+	CustomESC()
     Send {F6}
 	Send 5
     Return
@@ -149,6 +183,9 @@ SetShippingButton() {
 	IniWrite %  X . "," . Y, % ConfigFile, main, ShippingButton
     UserPopupTip("")
 }
+
+
+
 
 ;;;
 ;;;  Rotate
